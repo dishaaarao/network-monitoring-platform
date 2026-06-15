@@ -243,69 +243,63 @@ Use this as your roadmap. Work top to bottom.
 
 ### Phase A — GitHub and source control (Priority: HIGH)
 
-- [ ] Create GitHub repository `network-monitoring-platform`
-- [ ] Push project code to GitHub
-- [ ] Enable branch protection on `main` (require PR + CI pass)
-- [ ] Add repository description and topics (devops, kubernetes, terraform)
-- [ ] Verify GitHub Actions `CI` workflow passes on push
+- [x] Initialize local git repository and initial commit
+- [x] Add GitHub Actions CI workflow (`.github/workflows/ci.yml`)
+- [x] Add branch protection template (`.github/branch-protection.yml`)
+- [x] Add `scripts/setup-github.sh` with push instructions
+- [ ] Create GitHub repository and push code (manual — needs your GitHub account)
+- [ ] Enable branch protection on `main` in GitHub UI
+- [ ] Add `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN` secrets for image push
 
 ### Phase B — Container registry (Priority: HIGH)
 
-- [ ] Create Docker Hub or AWS ECR repository
+- [x] Add `registry.env.example` and `.env.example`
+- [x] Add optional Docker Hub push job in GitHub Actions
+- [ ] Create Docker Hub repository
 - [ ] Add registry credentials to Jenkins
-- [ ] Uncomment / enable Docker push in `Jenkinsfile`
-- [ ] Update `k8s/deployment.yaml` image to use registry URL (not `latest` local)
+- [ ] Uncomment push commands in `Jenkinsfile` after credentials exist
 
 ### Phase C — Jenkins live CI/CD (Priority: HIGH)
 
-- [ ] Install Jenkins (local VM, Docker, or cloud)
-- [ ] Install plugins: Docker, Kubernetes, Git, Pipeline
-- [ ] Connect Jenkins to GitHub repo (webhook or polling)
-- [ ] Run full pipeline: build → test → push → deploy
-- [ ] Document pipeline screenshot for portfolio
+- [x] Add local Jenkins via `jenkins/docker-compose.yml`
+- [x] Add `scripts/start-jenkins.sh`
+- [ ] Start Jenkins: `./scripts/start-jenkins.sh`
+- [ ] Complete Jenkins setup wizard at http://localhost:8081
+- [ ] Connect Jenkins pipeline to GitHub repo
 
 ### Phase D — Kubernetes deployment (Priority: HIGH)
 
-- [ ] Enable Kubernetes in Docker Desktop OR use minikube/kind
+- [x] Enhanced `scripts/deploy-k8s.sh`
+- [x] Add `scripts/install-metrics-server.sh` for HPA
+- [x] Add `k8s/vault-secret.yaml.example`
+- [ ] Enable Kubernetes in Docker Desktop
 - [ ] Run `./scripts/deploy-k8s.sh`
-- [ ] Verify: `kubectl get pods -n network-monitoring`
-- [ ] Test: `kubectl port-forward svc/network-monitoring-app -n network-monitoring 8080:80`
-- [ ] Install metrics-server for HPA: `kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml`
-- [ ] Verify HPA: `kubectl get hpa -n network-monitoring`
-- [ ] Deploy Prometheus + Grafana manifests in `k8s/monitoring/`
+- [ ] Verify HPA with metrics-server
 
 ### Phase E — AWS + Terraform (Priority: MEDIUM)
 
-- [ ] Create AWS account and IAM user with programmatic access
-- [ ] Copy `terraform/terraform.tfvars.example` to `terraform.tfvars`
-- [ ] Run `terraform init` and `terraform plan`
-- [ ] Run `terraform apply` (note: EKS costs money; use free tier where possible)
-- [ ] Configure `kubectl` for EKS: `aws eks update-kubeconfig`
-- [ ] Deploy app to EKS instead of local K8s
-- [ ] Point ALB target group to EKS service (or use AWS Load Balancer Controller)
+- [x] Terraform code for VPC, EKS, RDS, S3, IAM, ALB, CloudWatch
+- [ ] Create AWS account and configure `aws configure`
+- [ ] Run `terraform init` and `terraform apply`
 
 ### Phase F — Monitoring, logging, alerting (Priority: MEDIUM)
 
-- [ ] Create Grafana dashboard for `flask_http_request_total`
-- [ ] Add Prometheus alert rules (e.g. high error rate, pod down)
-- [ ] Configure Kibana index pattern for app logs
-- [ ] Connect CloudWatch to EKS logs after AWS deploy
-- [ ] Add Filebeat to ship container logs to Elasticsearch (config in `monitoring/filebeat.yml`)
+- [x] Prometheus alert rules (`monitoring/prometheus-alerts.yml`)
+- [x] Grafana dashboard auto-provisioning (`monitoring/grafana-dashboard.json`)
+- [x] Custom metric `network_devices_down_total`
+- [ ] Create Kibana index pattern after ELK is running
+- [ ] Connect CloudWatch after AWS deploy
 
 ### Phase G — Security with Vault (Priority: MEDIUM)
 
-- [ ] Run `./scripts/init-vault.sh` after stack starts
-- [ ] Update app to read DB credentials from Vault (Python `hvac` library)
-- [ ] Use Kubernetes secrets or Vault Agent injector in EKS
-- [ ] Remove plain-text passwords from `terraform.tfvars` (use Vault or AWS Secrets Manager)
+- [x] `vault_client.py` reads secrets from Vault via `hvac`
+- [x] `/api/config` shows Vault-backed DB config (no password exposed)
+- [x] `scripts/init-vault.sh` seeds demo secrets
+- [ ] Use production Vault token in K8s (`k8s/vault-secret.yaml`)
 
-### Phase H — Production polish and portfolio (Priority: LOW)
+### Phase H — One-command setup
 
-- [ ] Add architecture diagram to README
-- [ ] Record demo video: outage simulation + Grafana + recovery
-- [ ] Add PostgreSQL persistence (connect app to RDS)
-- [ ] Write incident runbook (what to do when outage simulated)
-- [ ] Add `docker-compose` health documentation for exam submission
+- [x] `scripts/setup-all.sh` — starts stack, Vault, outage demo
 
 ---
 

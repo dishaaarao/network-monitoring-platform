@@ -49,7 +49,7 @@ jobs:
 
   docker-push:
     needs: test-and-build
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push' && secrets.DOCKERHUB_USERNAME != ''
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

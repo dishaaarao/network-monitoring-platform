@@ -1,0 +1,17 @@
+# GitHub branch protection (run after repo is on GitHub and gh CLI is installed)
+#
+# gh api repos/{owner}/{repo}/branches/main/protection \
+#   --method PUT \
+#   --field required_status_checks='{"strict":true,"contexts":["test-and-build"]}' \
+#   --field enforce_admins=true \
+#   --field required_pull_request_reviews='{"required_approving_review_count":1}' \
+#   --field restrictions=null
+
+required_status_checks:
+  strict: true
+  contexts:
+    - test-and-build
+enforce_admins: false
+required_pull_request_reviews:
+  required_approving_review_count: 1
+restrictions: null

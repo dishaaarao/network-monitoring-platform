@@ -1,0 +1,71 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run API tests
+        run: |
+          python - <<'PY'
+          from app import app
+          c = app.test_client()
+          assert c.get("/health").status_code == 200
+          assert c.get("/api/devices").status_code == 200
+          assert c.get("/api/status").status_code == 200
+          r = c.post("/api/simulate-outage", json={"device_id": "router-01"})
+          assert r.status_code == 201
+          r = c.post("/api/recover")
+          assert r.status_code == 200
+          print("API tests passed")
+          PY
+
+      - name: Build Docker image
+        run: docker build -t network-monitoring-app:${{ github.sha }} .
+
+      - name: Smoke test container
+        run: |
+          docker run -d --name ci-app -p 8000:8000 network-monitoring-app:${{ github.sha }}
+          sleep 5
+          curl -f http://localhost:8000/health
+          curl -f http://localhost:8000/metrics
+          docker rm -f ci-app
+
+  docker-push:
+    needs: test-and-build
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/network-monitoring-app:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/network-monitoring-app:${{ github.sha }}

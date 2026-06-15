@@ -1,0 +1,29 @@
+groups:
+  - name: network-monitoring-alerts
+    rules:
+      - alert: AppDown
+        expr: up{job="flask-app"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Flask monitoring app is down"
+          description: "Prometheus cannot scrape the Flask app metrics endpoint."
+
+      - alert: HighRequestRate
+        expr: sum(rate(flask_http_request_total[5m])) > 10
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High HTTP request rate detected"
+          description: "Request rate exceeded threshold for 2 minutes."
+
+      - alert: DeviceOutageActive
+        expr: network_devices_down_total > 0
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "Network device outage detected"
+          description: "At least one device is in down state."

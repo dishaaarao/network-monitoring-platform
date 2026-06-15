@@ -1,0 +1,44 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "panels": [
+    {
+      "title": "HTTP Requests (rate)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "expr": "sum(rate(flask_http_request_total[5m]))",
+          "legendFormat": "requests/sec"
+        }
+      ]
+    },
+    {
+      "title": "Devices Down",
+      "type": "stat",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "targets": [
+        {
+          "expr": "network_devices_down_total",
+          "legendFormat": "down"
+        }
+      ]
+    },
+    {
+      "title": "Request Duration (p95)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 8 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(flask_http_request_duration_seconds_bucket[5m])) by (le))",
+          "legendFormat": "p95"
+        }
+      ]
+    }
+  ],
+  "schemaVersion": 39,
+  "tags": ["network-monitoring"],
+  "title": "Network Monitoring Platform",
+  "uid": "network-monitoring-main",
+  "version": 1
+}

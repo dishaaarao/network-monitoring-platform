@@ -30,7 +30,7 @@ pipeline {
                     python3 -c 'from app import app; c = app.test_client(); assert c.get("/health").status_code == 200; assert c.get("/api/devices").status_code == 200; print("unit tests passed")'
 
 
-                    docker run -d --name test-app -p 8000:8000 ${IMAGE_NAME}:${IMAGE_TAG}
+                    docker run -d --name test-app --network container:$HOSTNAME ${IMAGE_NAME}:${IMAGE_TAG}
                     sleep 5
                     curl -f http://localhost:8000/health
                     curl -f http://localhost:8000/api/status

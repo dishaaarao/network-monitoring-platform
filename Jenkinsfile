@@ -60,9 +60,9 @@ pipeline {
             steps {
                 sh '''
                     docker save network-monitoring-app:latest -o /tmp/app-latest.tar
-                    docker cp /tmp/app-latest.tar network-monitoring-cluster-control-plane:/tmp/app-latest.tar
-                    docker exec network-monitoring-cluster-control-plane ctr -n k8s.io images import /tmp/app-latest.tar
-                    docker exec network-monitoring-cluster-control-plane rm /tmp/app-latest.tar
+                    docker cp /tmp/app-latest.tar network-monitoring-cluster-control-plane:/app-latest.tar
+                    docker exec network-monitoring-cluster-control-plane ctr -n k8s.io images import /app-latest.tar
+                    docker exec network-monitoring-cluster-control-plane rm /app-latest.tar
                     rm -f /tmp/app-latest.tar
                 '''
                 sh 'kubectl apply -f k8s/namespace.yaml'
